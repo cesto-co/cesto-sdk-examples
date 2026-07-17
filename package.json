@@ -1,0 +1,32 @@
+{
+  "name": "cesto-sdk-examples",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Runnable TypeScript examples for the Cesto SDK (@cesto/sdk).",
+  "type": "module",
+  "engines": {
+    "node": ">=20.6"
+  },
+  "scripts": {
+    "products": "node --env-file=.env --import tsx src/01-list-products.ts",
+    "product": "node --env-file=.env --import tsx src/02-product-detail.ts",
+    "positions": "node --env-file=.env --import tsx src/03-get-positions.ts",
+    "position": "node --env-file=.env --import tsx src/04-get-position.ts",
+    "open": "node --env-file=.env --import tsx src/05-open-position.ts",
+    "close": "node --env-file=.env --import tsx src/06-close-position.ts",
+    "split-flow": "node --env-file=.env --import tsx src/07-split-flow.ts",
+    "errors": "node --env-file=.env --import tsx src/08-error-handling.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@cesto/sdk": "^0.1.1",
+    "@solana/web3.js": "^1.95.0",
+    "bs58": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "license": "MIT"
+}
