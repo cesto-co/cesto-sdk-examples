@@ -1,11 +1,11 @@
 /**
  * Fetch one basket by slug, including its backtested value chart.
  *
- * Run: pnpm product
+ * Run: pnpm byow:product
  */
 import { isPredictionMarketChart } from '@cesto/sdk';
 
-import { createClient, requireEnv } from './lib/client';
+import { createClient, requireEnv } from '../lib/client';
 
 const cesto = createClient();
 const slug = requireEnv('PRODUCT_SLUG');

@@ -10,20 +10,19 @@ export function requireEnv(name: string): string {
   return value;
 }
 
-/** Create a Cesto client from CESTO_API_KEY. */
+/** Create a Cesto client from CESTO_API_KEY (the SDK never reads env itself — pass it explicitly). */
 export function createClient(): Cesto {
-  // The SDK also reads CESTO_API_KEY itself; passing it explicitly for clarity.
+  // The SDK never reads env itself — pass the key explicitly.
   return new Cesto({ apiKey: requireEnv('CESTO_API_KEY') });
 }
 
 /**
  * Guard for examples that spend real funds. They run only with an explicit
- * `--yes` flag, e.g. `pnpm open --yes`.
+ * `--yes` flag, e.g. `pnpm byow:open --yes`.
  */
 export function confirmOrExit(description: string): void {
   if (process.argv.includes('--yes')) return;
-  console.log(`This example ${description} with REAL funds on Solana mainnet.`);
-  console.log('Re-run with --yes to proceed, e.g.:');
-  console.log('  pnpm open --yes');
+  console.log(`This example ${description} with REAL funds on mainnet.`);
+  console.log('Re-run the same command with --yes appended to proceed.');
   process.exit(0);
 }

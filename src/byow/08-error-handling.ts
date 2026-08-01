@@ -4,11 +4,11 @@
  * Everything the SDK throws extends CestoError; server responses become typed
  * APIError subclasses exposed on the Cesto client for instanceof checks.
  *
- * Run: pnpm errors
+ * Run: pnpm byow:errors
  */
 import { Cesto } from '@cesto/sdk';
 
-import { createClient } from './lib/client';
+import { createClient } from '../lib/client';
 
 const cesto = createClient();
 

@@ -4,9 +4,9 @@
  * Note: positions opened via the SDK are self-custody and do NOT appear here —
  * see 04-get-position.ts for the SDK position view.
  *
- * Run: pnpm positions
+ * Run: pnpm byow:positions
  */
-import { createClient, requireEnv } from './lib/client';
+import { createClient, requireEnv } from '../lib/client';
 
 const cesto = createClient();
 const user = requireEnv('WALLET_ADDRESS');

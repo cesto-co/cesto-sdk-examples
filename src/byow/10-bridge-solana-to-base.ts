@@ -26,8 +26,8 @@
  *                            (lossless, ~20s from Solana)
  *
  * Run:
- *   pnpm bridge:solana-to-base --yes
- *   pnpm bridge:solana-to-base --resume <transferId> [burnTxHash]
+ *   pnpm byow:bridge:solana-to-base --yes
+ *   pnpm byow:bridge:solana-to-base --resume <transferId> [burnTxHash]
  *
  * If the run dies after the burn lands, nothing is stuck: attestations never
  * expire. Re-run with --resume to re-register the burn or keep waiting.
@@ -37,7 +37,7 @@ import { BridgeTransferFailedError } from '@cesto/sdk';
 import { Connection, Keypair, LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
 import bs58 from 'bs58';
 
-import { loadKeypair } from './lib/wallet';
+import { loadKeypair } from '../lib/wallet';
 import {
   assertAddress,
   bridgeAmount,
@@ -51,8 +51,8 @@ import {
   solanaRpc,
   submitBurnWithRetry,
   usdc,
-} from './lib/bridge';
-import { createClient } from './lib/client';
+} from '../lib/bridge';
+import { createClient } from '../lib/client';
 
 async function main() {
   const resume = resumeArgs();
@@ -61,7 +61,7 @@ async function main() {
     return;
   }
 
-  confirmOrExit('bridge:solana-to-base');
+  confirmOrExit('byow:bridge:solana-to-base');
 
   const amount = bridgeAmount();
   const mode = bridgeMode();
@@ -95,7 +95,7 @@ async function main() {
     mode,
     sourceAddress: solana.publicKey.toBase58(),
   });
-  if (burn.kind !== 'solana') throw new Error('expected a Solana burn payload');
+  if (burn?.kind !== 'solana') throw new Error('expected a Solana burn payload');
   console.log(`transfer ${transferId} — signing burn on Solana…`);
 
   // ── 3. Sign + land the burn on Solana. ─────────────────────────────────────
@@ -123,7 +123,7 @@ main().catch((error) => {
   if (error instanceof BridgeTransferFailedError) {
     console.error(`\n❌ transfer ${error.transferId} FAILED: ${error.reason ?? 'no reason recorded'}`);
     console.error('A landed burn is never lost — attestations do not expire. Re-run with:');
-    console.error(`  pnpm bridge:solana-to-base --resume ${error.transferId}`);
+    console.error(`  pnpm byow:bridge:solana-to-base --resume ${error.transferId}`);
   } else {
     console.error('\n❌ bridge failed:', error);
   }

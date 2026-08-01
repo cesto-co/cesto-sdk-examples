@@ -25,8 +25,8 @@
  *                            (lossless, ~15–20 min of EVM finality)
  *
  * Run:
- *   pnpm bridge:base-to-solana --yes
- *   pnpm bridge:base-to-solana --resume <transferId> [burnTxHash]
+ *   pnpm byow:bridge:base-to-solana --yes
+ *   pnpm byow:bridge:base-to-solana --resume <transferId> [burnTxHash]
  *
  * If the run dies after the burn lands, nothing is stuck: attestations never
  * expire. Re-run with --resume to re-register the burn or keep waiting.
@@ -52,8 +52,8 @@ import {
   submitBurnWithRetry,
   usdc,
   waitForAllowance,
-} from './lib/bridge';
-import { createClient } from './lib/client';
+} from '../lib/bridge';
+import { createClient } from '../lib/client';
 
 async function main() {
   const resume = resumeArgs();
@@ -62,7 +62,7 @@ async function main() {
     return;
   }
 
-  confirmOrExit('bridge:base-to-solana');
+  confirmOrExit('byow:bridge:base-to-solana');
 
   const amount = bridgeAmount();
   const mode = bridgeMode();
@@ -99,7 +99,7 @@ async function main() {
     mode,
     sourceAddress: evmAccount.address, // the wallet that will sign the burn
   });
-  if (burn.kind !== 'evm') throw new Error('expected an EVM burn payload');
+  if (burn?.kind !== 'evm') throw new Error('expected an EVM burn payload');
   console.log(`transfer ${transferId} — signing burn on Base…`);
 
   const walletClient = createWalletClient({ account: evmAccount, chain: base, transport: http(BASE_RPC) });
@@ -143,7 +143,7 @@ main().catch((error) => {
   if (error instanceof BridgeTransferFailedError) {
     console.error(`\n❌ transfer ${error.transferId} FAILED: ${error.reason ?? 'no reason recorded'}`);
     console.error('A landed burn is never lost — attestations do not expire. Re-run with:');
-    console.error(`  pnpm bridge:base-to-solana --resume ${error.transferId}`);
+    console.error(`  pnpm byow:bridge:base-to-solana --resume ${error.transferId}`);
   } else {
     console.error('\n❌ bridge failed:', error);
   }

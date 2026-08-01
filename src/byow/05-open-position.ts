@@ -3,12 +3,12 @@
  *
  * Your wallet signs locally via the `signTransactions` callback; the SDK never
  * sees the private key. Requires a WRITE-scoped API key and a wallet funded
- * with the input token plus SOL for gas (Cesto does not sponsor gas).
+ * with the input token — gas and rent are sponsored by Cesto (no SOL needed).
  *
- * Run: pnpm open --yes
+ * Run: pnpm byow:open --yes
  */
-import { confirmOrExit, createClient, requireEnv } from './lib/client';
-import { createSignTransactions, loadKeypair, printExecution } from './lib/wallet';
+import { confirmOrExit, createClient, requireEnv } from '../lib/client';
+import { createSignTransactions, loadKeypair, printExecution } from '../lib/wallet';
 
 const cesto = createClient();
 const slug = requireEnv('PRODUCT_SLUG');

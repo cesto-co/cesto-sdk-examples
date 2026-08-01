@@ -3,9 +3,9 @@
  * basket's constituent tokens (exactly what a close would sell). This is the
  * position view for SDK-opened positions. Works with a read-only key.
  *
- * Run: pnpm position
+ * Run: pnpm byow:position
  */
-import { createClient, requireEnv } from './lib/client';
+import { createClient, requireEnv } from '../lib/client';
 
 const cesto = createClient();
 

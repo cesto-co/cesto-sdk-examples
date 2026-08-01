@@ -1,9 +1,9 @@
 /**
  * List Cesto baskets (products), then list again with backtested performance.
  *
- * Run: pnpm products
+ * Run: pnpm byow:products
  */
-import { createClient } from './lib/client';
+import { createClient } from '../lib/client';
 
 const cesto = createClient();
 

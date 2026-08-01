@@ -6,12 +6,12 @@
  * "browser" section is the code you'd move behind wallet-adapter's
  * `signTransaction`.
  *
- * Run: pnpm split-flow --yes
+ * Run: pnpm byow:split-flow --yes
  */
 import { VersionedTransaction } from '@solana/web3.js';
 
-import { confirmOrExit, createClient, requireEnv } from './lib/client';
-import { loadKeypair, printExecution } from './lib/wallet';
+import { confirmOrExit, createClient, requireEnv } from '../lib/client';
+import { loadKeypair, printExecution } from '../lib/wallet';
 
 const cesto = createClient();
 const slug = requireEnv('PRODUCT_SLUG');

@@ -5,70 +5,86 @@ the typed, server-side TypeScript client for the [Cesto](https://cesto.co) API.
 
 Full documentation: **[docs.cesto.co/sdk/overview](https://docs.cesto.co/sdk/overview)**
 
-## Examples
+## Two integration tracks
 
-| Example | Script | What it shows |
-| --- | --- | --- |
-| [`01-list-products.ts`](src/01-list-products.ts) | `pnpm products` | List baskets, with backtested performance |
-| [`02-product-detail.ts`](src/02-product-detail.ts) | `pnpm product` | Fetch one basket + its backtest chart (union type guard) |
-| [`03-get-positions.ts`](src/03-get-positions.ts) | `pnpm positions` | A user's Cesto-account positions by wallet |
-| [`04-get-position.ts`](src/04-get-position.ts) | `pnpm position` | Live on-chain position in one basket (the SDK position view) |
-| [`05-open-position.ts`](src/05-open-position.ts) | `pnpm open --yes` | Open a position — one-call `open.execute` with local signing |
-| [`06-close-position.ts`](src/06-close-position.ts) | `pnpm close --yes` | Close the full holding — one-call `close.execute` |
-| [`07-split-flow.ts`](src/07-split-flow.ts) | `pnpm split-flow --yes` | The explicit prepare → sign → submit → poll flow (what a web app does) |
-| [`08-error-handling.ts`](src/08-error-handling.ts) | `pnpm errors` | Typed errors, per-request overrides, cancellation |
-| [`09-bridge-base-to-solana.ts`](src/09-bridge-base-to-solana.ts) | `pnpm bridge:base-to-solana --yes` | Bridge USDC Base → Solana via CCTP (relayer-paid destination) |
-| [`10-bridge-solana-to-base.ts`](src/10-bridge-solana-to-base.ts) | `pnpm bridge:solana-to-base --yes` | Bridge USDC Solana → Base via CCTP (relayer-paid destination) |
+The examples are split by custody model — pick the one that matches your product:
 
-Shared helpers live in [`src/lib/`](src/lib): client setup and the
-`signTransactions` callback used by the write examples.
+- **`src/byow/` — Bring Your Own Wallet (self-custody).** The end user's Solana
+  wallet signs every transaction locally; Cesto builds unsigned transactions,
+  byte-verifies the signatures, and lands them. Cesto never holds the key.
+  This is the flow a web app wires to a wallet adapter.
+- **`src/managed/` — Managed wallets (custodial).** Cesto provisions a Privy
+  Solana wallet per user and signs everything server-side (sponsor pays gas).
+  The user only ever needs an EVM wallet — funding is a Base USDC transfer,
+  and the full custody loop is `managed:fund` → `managed:open` →
+  `managed:close` (which also withdraws the proceeds back to Base).
 
-## Setup
+Shared helpers (client setup, wallet loading, bridge utilities) live in
+[`src/lib/`](src/lib).
+
+## Quickstart
 
 Requires **Node.js 20.6+** (the scripts run TypeScript directly via [`tsx`](https://tsx.is) with `node --env-file`).
 
 ```bash
 pnpm install
 cp .env.example .env   # then fill it in
+pnpm byow:products     # read-only smoke test
 ```
 
-| Variable | Needed by | Notes |
-| --- | --- | --- |
-| `CESTO_API_KEY` | all | `cesto_sk_…`. Write examples (05–07) need a **write-scoped** key. |
-| `PRODUCT_SLUG` | 02, 04–07 | Basket to use. |
-| `WALLET_ADDRESS` | 03, 04, 09, 10 | Any Solana address to read; 09 checks the signing key derives it. |
-| `WALLET_SECRET_KEY` | 05–07, 10 | Base58 string or JSON byte array. A wallet **you** control. |
-| `OPEN_AMOUNT_BASE_UNITS` | 05, 07 | Input amount in base units (e.g. 5 USDC = `5000000`). |
-| `BRIDGE_AMOUNT_BASE_UNITS` | 09, 10 | USDC per bridge leg (default `1000000` = 1 USDC). |
-| `BRIDGE_MODE` | 09, 10 | `fast` (default) or `standard`. |
-| `EVM_USER_PRIVATE_KEY` | 09 | 0x-prefixed key of the EVM wallet used on Base. |
-| `EVM_WALLET_ADDRESS` | 09, 10 | The EVM wallet's address — 09 verifies the key derives it; 10 bridges to it. |
+### BYOW track
 
-Examples 09/10 bridge **real USDC on mainnet** in both directions. Each
-needs only its source-chain key — 09 signs with `EVM_USER_PRIVATE_KEY` (Base,
-plus a little ETH for burn gas), 10 with `WALLET_SECRET_KEY` (Solana); the
-destination leg is always gasless (relayer-paid, ATA rent included). Set
-`WALLET_ADDRESS` / `EVM_WALLET_ADDRESS` to the funded addresses — the scripts
-refuse to run when a key derives a different address. Recover an interrupted
-transfer (burn landed but the run died) with `--resume <transferId>
-[burnTxHash]` on either script.
+| Script | What it does | Required `.env` vars | Spends real funds? |
+| --- | --- | --- | --- |
+| `pnpm byow:products` | List baskets, with backtested performance | `CESTO_API_KEY` | no |
+| `pnpm byow:product` | Fetch one basket + its backtest chart | `CESTO_API_KEY`, `PRODUCT_SLUG` | no |
+| `pnpm byow:positions` | A user's Cesto-account positions by wallet | `CESTO_API_KEY`, `WALLET_ADDRESS` | no |
+| `pnpm byow:position` | Live on-chain position in one basket | `CESTO_API_KEY`, `WALLET_ADDRESS`, `PRODUCT_SLUG` | no |
+| `pnpm byow:open --yes` | Open a position — one-call `open.execute` with local signing | + `WALLET_SECRET_KEY`, `OPEN_AMOUNT_BASE_UNITS` | **yes** (Solana swaps + gas) |
+| `pnpm byow:close --yes` | Close the full holding — one-call `close.execute` | + `WALLET_SECRET_KEY` | **yes** |
+| `pnpm byow:split-flow --yes` | The explicit prepare → sign → submit → poll flow | same as `byow:open` | **yes** |
+| `pnpm byow:errors` | Typed errors, per-request overrides, cancellation | `CESTO_API_KEY` | no |
+| `pnpm byow:bridge:base-to-solana --yes` | Bridge USDC Base → Solana via CCTP (EVM-signed burn) | `CESTO_API_KEY` (write), `EVM_USER_PRIVATE_KEY`, `EVM_WALLET_ADDRESS` | **yes** (USDC + a little Base ETH) |
+| `pnpm byow:bridge:solana-to-base --yes` | Bridge USDC Solana → Base via CCTP (locally signed burn) | `CESTO_API_KEY` (write), `WALLET_SECRET_KEY`, `WALLET_ADDRESS`, `EVM_WALLET_ADDRESS` | **yes** (USDC + SOL — see below) |
+
+Bridge extras: `BRIDGE_AMOUNT_BASE_UNITS` (default `1000000` = 1 USDC) and
+`BRIDGE_MODE` (`fast` default, or `standard`). Recover an interrupted transfer
+with `--resume <transferId> [burnTxHash]` on either bridge script.
+
+> **Solana-source burns need SOL.** The Solana → Base burn creates a fresh
+> CCTP message account per transfer — keep **~0.005 SOL** in
+> `WALLET_ADDRESS` for rent + the transaction fee. (Managed Solana burns are
+> sponsor-paid, so the managed track needs no SOL at all.)
+
+### Managed track
+
+| Script | What it does | Required `.env` vars | Spends real funds? |
+| --- | --- | --- | --- |
+| `pnpm managed:user` | Provision the managed Solana wallet (idempotent) | `CESTO_API_KEY`, `EVM_WALLET_ADDRESS` | no |
+| `pnpm managed:balances` | Print Base ETH/USDC + Solana SOL/USDC balances | `EVM_WALLET_ADDRESS`, `WALLET_ADDRESS` | no |
+| `pnpm managed:fund --yes` | Bridge USDC Base → the managed Solana wallet (EVM-signed burn) | `CESTO_API_KEY` (write), `EVM_USER_PRIVATE_KEY`, `EVM_WALLET_ADDRESS` | **yes** (USDC + a little Base ETH) |
+| `pnpm managed:open --yes` | Open a position — server-signed `managed.openAndWait` | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG`, `OPEN_AMOUNT_BASE_UNITS` (or a numeric CLI arg) | **yes** |
+| `pnpm managed:gets` | Exercise every SDK GET endpoint | `CESTO_API_KEY`, `EVM_WALLET_ADDRESS`, `WALLET_ADDRESS`, `PRODUCT_SLUG` | no |
+| `pnpm managed:close --yes` | Close the position AND withdraw — `managed.closeAndWait` → auto-signed Solana→Base burn → USDC lands on the EVM wallet | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG` | **yes** |
+
+## Security
+
+- **Keys come from `.env` only.** `.env` is gitignored — never commit it, and
+  never hardcode keys in source. The scripts read secrets from the environment
+  and never print them.
+- **Write examples execute real mainnet transactions.** Solana swaps, Base
+  approvals/burns, and bridge transfers move actual USDC. Every write example
+  refuses to run without an explicit `--yes` flag.
+- **API keys are server-side only.** `CESTO_API_KEY` must never ship to a
+  browser or mobile client — call the Cesto API from your backend. Write
+  examples need a **write-scoped** key.
+- **Use a dedicated test wallet with small balances.** Do not point these
+  examples at a wallet holding meaningful funds.
 
 No self-serve portal yet — request an API key via the
 [Cesto community](https://t.me/cesto_co).
 
-## ⚠️ The write examples spend real funds
-
-Examples 05–07 execute **real swaps on Solana mainnet** from the wallet in
-`WALLET_SECRET_KEY`, which pays its own gas (it must hold SOL). They refuse to
-run without an explicit `--yes` flag:
-
-```bash
-pnpm open --yes
-```
-
-Use a dedicated test wallet with small amounts. Never commit `.env`.
-
-## How the write flow works
+## How the BYOW write flow works
 
 The end-user's wallet signs its own transactions — Cesto never holds the key:
 
