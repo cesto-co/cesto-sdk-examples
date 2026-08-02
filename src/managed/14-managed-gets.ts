@@ -14,7 +14,7 @@ import { createClient, requireEnv } from '../lib/client';
 const cesto = createClient();
 const evmWalletAddress = requireEnv('EVM_WALLET_ADDRESS').trim();
 const solWallet = requireEnv('WALLET_ADDRESS').trim();
-const slug = process.env.PRODUCT_SLUG?.trim() || 'test-basket-sdk';
+const slug = requireEnv('PRODUCT_SLUG').trim();
 const [transferId, executionId] = process.argv.slice(2).filter((a) => !a.startsWith('-'));
 
 console.log('══ products.list ══');

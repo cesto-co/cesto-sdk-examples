@@ -34,7 +34,7 @@
  */
 
 import { BridgeTransferFailedError } from '@cesto/sdk';
-import { Connection, Keypair, LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js';
+import { Connection, Keypair, LAMPORTS_PER_SOL, VersionedTransaction } from '@solana/web3.js';
 import bs58 from 'bs58';
 
 import { loadKeypair } from '../lib/wallet';
@@ -102,9 +102,9 @@ async function main() {
   // The server built this transaction moments ago (fresh blockhash) — sign and
   // send it promptly. Co-signers: the user wallet (fee payer + USDC owner) and
   // every ephemeral message-event keypair returned by the API.
-  const tx = Transaction.from(Buffer.from(burn.transaction, 'base64'));
+  const tx = VersionedTransaction.deserialize(Buffer.from(burn.transaction, 'base64'));
   const extraSigners = burn.additionalSignerSecrets.map((s) => Keypair.fromSecretKey(bs58.decode(s)));
-  tx.sign(solana, ...extraSigners);
+  tx.sign([solana, ...extraSigners]);
 
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
   const burnTxHash = await connection.sendRawTransaction(tx.serialize());
