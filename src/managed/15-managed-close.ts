@@ -2,8 +2,10 @@
  * 15 — Close the managed position AND withdraw the proceeds to the user's EVM
  * wallet: the full custody loop, with no user signature anywhere.
  *
- *   1. `managed.closeAndWait` sells the managed wallet's full holding of the
- *      basket back to USDC, server-signed by the managed Privy wallet.
+ *   1. `close.startAndWait` sells the managed wallet's full holding of the
+ *      basket back to USDC, server-signed by the managed Privy wallet. No
+ *      `consent` — see 13-managed-open.ts for why that field is the whole
+ *      difference between the two server-signed flows.
  *   2. `bridge.initiate` (solana → base) from the managed address. Managed
  *      burns are auto-signed and landed server-side (sponsor pays gas), so the
  *      response is `{ status: 'BURN_SUBMITTED', burn: null, burnTxHash }` —
@@ -42,11 +44,11 @@ async function main() {
   const managed = await cesto.users.get(evmWalletAddress);
   console.log(`managed wallet: ${managed.solanaAddress}`);
 
-  const before = await cesto.positions.getPosition({ user: managed.solanaAddress, slug });
+  const before = await cesto.positions.getHoldings({ wallet: managed.solanaAddress, product: slug });
   console.log(`before: hasPosition=${before.hasPosition} totalValueUsd=$${before.totalValueUsd}`);
 
   // ── 1. Close — sell the full holding back to USDC (server-signed). ──────────
-  const result = await cesto.managed.closeAndWait({ user: evmWalletAddress, slug });
+  const result = await cesto.close.startAndWait({ user: evmWalletAddress, product: slug });
   printExecution(result);
 
   // ── 2. Withdraw — bridge the managed wallet's full USDC balance to Base. ────

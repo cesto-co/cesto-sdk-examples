@@ -9,9 +9,9 @@
 import { createClient, requireEnv } from '../lib/client';
 
 const cesto = createClient();
-const user = requireEnv('WALLET_ADDRESS');
+const wallet = requireEnv('WALLET_ADDRESS');
 
-const { positions, pendingClosePositions } = await cesto.positions.getPositions({ user });
+const { positions, pendingClosePositions } = await cesto.positions.list({ wallet });
 
 // A wallet with no Cesto account returns an empty result (not an error).
 console.log(`${positions.length} open, ${pendingClosePositions.length} pending close\n`);

@@ -14,7 +14,7 @@ const cesto = createClient();
 
 // 1) A 404 becomes Cesto.NotFoundError.
 try {
-  await cesto.products.get('this-slug-does-not-exist');
+  await cesto.products.get({ slug: 'this-slug-does-not-exist' });
 } catch (err) {
   if (err instanceof Cesto.NotFoundError) {
     console.log(`NotFoundError as expected — status ${err.status}, requestId ${err.requestId}`);

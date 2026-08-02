@@ -10,7 +10,8 @@ import { createClient, requireEnv } from '../lib/client';
 const cesto = createClient();
 const slug = requireEnv('PRODUCT_SLUG');
 
-const product = await cesto.products.get(slug, {
+const product = await cesto.products.get({
+  slug,
   includeBacktestChart: true,
   chartTimeRange: '1y', // '7d' | '1m' | '3m' | '6m' | '1y' | 'all'
 });

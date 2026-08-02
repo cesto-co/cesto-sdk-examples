@@ -1,8 +1,8 @@
 /**
  * 14 — Exercise every SDK GET endpoint against the managed flow.
  *
- * Covers: products.list (+backtest), products.get (+chart), positions.getPositions,
- * positions.getPosition, users.get, bridge.getTransfer, positions.getExecution.
+ * Covers: products.list (+backtest), products.get (+chart), positions.list,
+ * positions.getHoldings, users.get, bridge.getTransfer, positions.getExecution.
  * Read-only.
  *
  * Run:
@@ -24,21 +24,21 @@ console.log('══ products.list({ includeBacktest: true }) ══');
 const withBacktest = await cesto.products.list({ includeBacktest: true });
 console.log(`backtest present on ${withBacktest.filter((p) => p.backtest).length}/${withBacktest.length}`);
 
-console.log(`══ products.get("${slug}", includeBacktestChart) ══`);
-const product = await cesto.products.get(slug, { includeBacktestChart: true });
+console.log(`══ products.get({ slug: "${slug}", includeBacktestChart }) ══`);
+const product = await cesto.products.get({ slug, includeBacktestChart: true });
 console.log(`id=${product.id} versionId=${product.versionId} inputDecimals=${product.inputTokenDecimals} min=${product.minimumInvestment}`);
 console.log(`chart: ${product.backtestChart ? 'present' : 'null'}`);
 
-console.log('══ positions.getPositions({ user: WALLET_ADDRESS }) ══');
-const accountPositions = await cesto.positions.getPositions({ user: solWallet });
+console.log('══ positions.list({ wallet: WALLET_ADDRESS }) ══');
+const accountPositions = await cesto.positions.list({ wallet: solWallet });
 console.log(`positions=${accountPositions.positions.length} pendingClose=${accountPositions.pendingClosePositions.length}`);
 
 console.log('══ users.get(evmWalletAddress) ══');
 const managed = await cesto.users.get(evmWalletAddress);
 console.log(managed);
 
-console.log(`══ positions.getPosition({ user: managed.solanaAddress, slug }) ══`);
-const position = await cesto.positions.getPosition({ user: managed.solanaAddress, slug });
+console.log(`══ positions.getHoldings({ wallet: managed.solanaAddress, product: slug }) ══`);
+const position = await cesto.positions.getHoldings({ wallet: managed.solanaAddress, product: slug });
 console.log(`hasPosition=${position.hasPosition} totalValueUsd=$${position.totalValueUsd} holdings=${position.holdings.length} lastExecution=${position.lastExecution?.status ?? 'null'}`);
 
 if (transferId) {

@@ -27,7 +27,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cesto/sdk": "^0.4.1",
+    "@cesto/sdk": "^0.4.3",
     "@solana/web3.js": "^1.95.0",
     "bs58": "^6.0.0",
     "viem": "^2.55.8"

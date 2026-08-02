@@ -13,21 +13,21 @@ const cesto = createClient();
 const slug = requireEnv('PRODUCT_SLUG');
 
 const keypair = loadKeypair();
-const user = keypair.publicKey.toBase58();
+const wallet = keypair.publicKey.toBase58();
 
 // Nothing to sell → nothing to close. Check before preparing.
-const position = await cesto.positions.getPosition({ user, slug });
+const position = await cesto.positions.getHoldings({ wallet, product: slug });
 if (!position.hasPosition) {
-  console.log(`${user} holds nothing from "${slug}" — nothing to close.`);
+  console.log(`${wallet} holds nothing from "${slug}" — nothing to close.`);
   process.exit(0);
 }
 console.log(`Closing ≈ $${position.totalValueUsd} across ${position.holdings.length} token(s).`);
 
-confirmOrExit(`closes the full "${slug}" holding of ${user}`);
+confirmOrExit(`closes the full "${slug}" holding of ${wallet}`);
 
 const result = await cesto.close.execute({
-  user,
-  slug,
+  wallet,
+  product: slug,
   signTransactions: createSignTransactions(keypair),
 });
 

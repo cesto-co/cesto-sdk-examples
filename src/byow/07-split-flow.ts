@@ -18,13 +18,13 @@ const slug = requireEnv('PRODUCT_SLUG');
 const amount = BigInt(requireEnv('OPEN_AMOUNT_BASE_UNITS'));
 
 const keypair = loadKeypair();
-const user = keypair.publicKey.toBase58();
+const wallet = keypair.publicKey.toBase58();
 
-confirmOrExit(`opens a position in "${slug}" for ${amount} base units from ${user}`);
+confirmOrExit(`opens a position in "${slug}" for ${amount} base units from ${wallet}`);
 
 // 1) BACKEND — prepare. Cesto builds the unsigned transactions and keeps the
 //    canonical bytes for ~60s. Get them signed and submitted before expiresAt.
-const prepared = await cesto.open.prepare({ user, slug, amount });
+const prepared = await cesto.open.prepare({ wallet, product: slug, amount });
 console.log(`Prepared ${prepared.transactions.length} tx(s), expires ${prepared.expiresAt}`);
 
 // 2) "BROWSER" — the user's wallet signs each transaction AS-IS. Any modified

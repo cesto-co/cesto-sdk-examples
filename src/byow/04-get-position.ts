@@ -9,9 +9,9 @@ import { createClient, requireEnv } from '../lib/client';
 
 const cesto = createClient();
 
-const position = await cesto.positions.getPosition({
-  user: requireEnv('WALLET_ADDRESS'),
-  slug: requireEnv('PRODUCT_SLUG'),
+const position = await cesto.positions.getHoldings({
+  wallet: requireEnv('WALLET_ADDRESS'),
+  product: requireEnv('PRODUCT_SLUG'),
 });
 
 console.log(`${position.productSlug} — hasPosition: ${position.hasPosition}`);

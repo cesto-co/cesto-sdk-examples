@@ -19,6 +19,13 @@ The examples are split by custody model — pick the one that matches your produ
   and the full custody loop is `managed:fund` → `managed:open` →
   `managed:close` (which also withdraws the proceeds back to Base).
 
+Server-signed execution is one method across both — `open.start(…)`,
+`close.start(…)`, `rebalance.start(…)`, plus the `…AndWait` variants that poll to
+a terminal status. What differs is the `consent` field: a Cesto account holder
+signs a challenge (`open.createChallenge`) to authorize each action, while a
+managed user has no key of their own, so your API key is the sole authority and
+`consent` is simply omitted — as in `src/managed/` below.
+
 Shared helpers (client setup, wallet loading, bridge utilities) live in
 [`src/lib/`](src/lib).
 
@@ -63,9 +70,9 @@ with `--resume <transferId> [burnTxHash]` on either bridge script.
 | `pnpm managed:user` | Provision the managed Solana wallet (idempotent) | `CESTO_API_KEY`, `EVM_WALLET_ADDRESS` | no |
 | `pnpm managed:balances` | Print Base ETH/USDC + Solana SOL/USDC balances | `EVM_WALLET_ADDRESS`, `WALLET_ADDRESS` | no |
 | `pnpm managed:fund --yes` | Bridge USDC Base → the managed Solana wallet (EVM-signed burn) | `CESTO_API_KEY` (write), `EVM_USER_PRIVATE_KEY`, `EVM_WALLET_ADDRESS` | **yes** (USDC + a little Base ETH) |
-| `pnpm managed:open --yes` | Open a position — server-signed `managed.openAndWait` | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG`, `OPEN_AMOUNT_BASE_UNITS` (or a numeric CLI arg) | **yes** |
+| `pnpm managed:open --yes` | Open a position — server-signed `open.startAndWait` (no `consent`) | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG`, `OPEN_AMOUNT_BASE_UNITS` (or a numeric CLI arg) | **yes** |
 | `pnpm managed:gets` | Exercise every SDK GET endpoint | `CESTO_API_KEY`, `EVM_WALLET_ADDRESS`, `WALLET_ADDRESS`, `PRODUCT_SLUG` | no |
-| `pnpm managed:close --yes` | Close the position AND withdraw — `managed.closeAndWait` → auto-signed Solana→Base burn → USDC lands on the EVM wallet | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG` | **yes** |
+| `pnpm managed:close --yes` | Close the position AND withdraw — `close.startAndWait` → auto-signed Solana→Base burn → USDC lands on the EVM wallet | `CESTO_API_KEY` (write), `EVM_WALLET_ADDRESS`, `PRODUCT_SLUG` | **yes** |
 
 ## Security
 

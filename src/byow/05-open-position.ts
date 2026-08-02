@@ -15,20 +15,20 @@ const slug = requireEnv('PRODUCT_SLUG');
 const amount = BigInt(requireEnv('OPEN_AMOUNT_BASE_UNITS'));
 
 const keypair = loadKeypair();
-const user = keypair.publicKey.toBase58();
+const wallet = keypair.publicKey.toBase58();
 
-confirmOrExit(`opens a position in "${slug}" for ${amount} base units from ${user}`);
+confirmOrExit(`opens a position in "${slug}" for ${amount} base units from ${wallet}`);
 
 const result = await cesto.open.execute({
-  user,
-  slug,
+  wallet,
+  product: slug,
   amount,
   signTransactions: createSignTransactions(keypair),
 });
 
 printExecution(result);
 
-// Read the position back — SDK positions are self-custody, so getPosition
-// (live on-chain holdings) is the position view, not getPositions.
-const position = await cesto.positions.getPosition({ user, slug });
+// Read the position back — SDK positions are self-custody, so getHoldings
+// (live on-chain balances) is the position view, not positions.list.
+const position = await cesto.positions.getHoldings({ wallet, product: slug });
 console.log(`\nPosition value now: $${position.totalValueUsd}`);
