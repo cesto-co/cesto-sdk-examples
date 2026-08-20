@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cesto/sdk':
-        specifier: ^0.4.3
-        version: 0.4.3(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))
+        specifier: ^0.4.4
+        version: 0.4.4(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))
       '@solana/web3.js':
         specifier: ^1.95.0
         version: 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
@@ -40,8 +40,8 @@ packages:
     resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
     engines: {node: '>=6.9.0'}
 
-  '@cesto/sdk@0.4.3':
-    resolution: {integrity: sha512-3tNVL7baV01FTfokN1jsib9L45ayBj1KYuB2DRzpnK0qud37mYM06cK7gSXTmjcXDE5EP/EMyHnmxYN4HxJsig==}
+  '@cesto/sdk@0.4.4':
+    resolution: {integrity: sha512-9L853kAcjvBO6rRF8kSpsASCkbigYme6WJ6xSWnX67m/NvT0aw+fyjIlN6IQkeFypdIPb1sMm9O33J9ZBxKs8A==}
     engines: {node: '>=18'}
     peerDependencies:
       '@solana/web3.js': ^1.95.0
@@ -519,7 +519,7 @@ snapshots:
 
   '@babel/runtime@7.29.7': {}
 
-  '@cesto/sdk@0.4.3(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))':
+  '@cesto/sdk@0.4.4(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))':
     optionalDependencies:
       '@solana/web3.js': 1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
 
