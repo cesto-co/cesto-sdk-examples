@@ -6,7 +6,15 @@
 import type { Cesto } from '@cesto/sdk';
 import type { BridgeMode, BridgeTransfer } from '@cesto/sdk';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { type Address, type Hex, createPublicClient, formatUnits, http, parseAbi } from 'viem';
+import {
+  type Address,
+  type Hex,
+  createPublicClient,
+  decodeFunctionData,
+  formatUnits,
+  http,
+  parseAbi,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 
@@ -123,6 +131,25 @@ export async function submitBurnWithRetry(cesto: Cesto, transferId: string, burn
       await sleep(4000);
     }
   }
+}
+
+/**
+ * The spender an `approve(address,uint256)` calldata grants to.
+ *
+ * NOT `approvalTx.to`. That is the USDC contract — the address an approve call
+ * is SENT to. The spender is approve's first argument (CCTP's TokenMessenger).
+ *
+ * Passing `approvalTx.to` as the spender made `waitForAllowance` poll
+ * `allowance(owner, USDC)`, which is 0 and always will be, so every first-time
+ * Base-source bridge timed out after 40s on an approval that had landed
+ * correctly and granted exactly the right allowance.
+ */
+export function approvalSpender(data: Hex): Address {
+  const { args } = decodeFunctionData({
+    abi: parseAbi(['function approve(address spender, uint256 amount)']),
+    data,
+  });
+  return args[0] as Address;
 }
 
 /**

@@ -26,6 +26,7 @@ import {
   resumeTransfer,
   submitBurnWithRetry,
   usdc,
+  approvalSpender,
   waitForAllowance,
 } from '../lib/bridge';
 import { createClient } from '../lib/client';
@@ -85,7 +86,12 @@ async function main() {
     });
     await publicClient.waitForTransactionReceipt({ hash: approveHash });
     console.log(`approval: https://basescan.org/tx/${approveHash}`);
-    await waitForAllowance(publicClient, evmAccount.address, burn.approvalTx.to as Address, BigInt(amount));
+    await waitForAllowance(
+      publicClient,
+      evmAccount.address,
+      approvalSpender(burn.approvalTx.data as Hex),
+      BigInt(amount),
+    );
   } else {
     console.log('(allowance already sufficient — skipping approval)');
   }
