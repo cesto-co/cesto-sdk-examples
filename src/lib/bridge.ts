@@ -33,8 +33,16 @@ export const bridgeMode = (): BridgeMode =>
 
 // ── Clients ───────────────────────────────────────────────────────────────────
 
-// Default: a public endpoint that tolerates bursts better than mainnet.base.org.
-export const BASE_RPC = process.env.BASE_RPC_URL ?? 'https://base-rpc.publicnode.com';
+// Base's official public endpoint. It rate-limits bursts, which is why
+// `waitForAllowance` polls — but it does serve the reads these examples make.
+//
+// It previously defaulted to `base-rpc.publicnode.com`, chosen for burst
+// tolerance, which rejects `eth_call` at anything but the latest block with
+// `-32602 Archive requests require a personal token`. Every Base-source bridge
+// example failed on it out of the box, and the failure surfaced as an allowance
+// timeout rather than as an RPC error. Override with BASE_RPC_URL if you have a
+// dedicated endpoint — recommended for anything beyond trying the examples.
+export const BASE_RPC = process.env.BASE_RPC_URL ?? 'https://mainnet.base.org';
 
 // A client bound to `base` is not assignable to viem's default PublicClient
 // generic (OP-stack tx shapes) — infer the concrete type from a factory.
@@ -127,6 +135,7 @@ export async function waitForAllowance(
   spender: Address,
   needed: bigint,
 ) {
+  let lastError: unknown;
   for (let i = 0; i < 20; i++) {
     try {
       const allowance = await client.readContract({
@@ -136,14 +145,21 @@ export async function waitForAllowance(
         args: [owner, spender],
       });
       if (allowance >= needed) return;
-    } catch {
-      // Transient RPC error (rate limit / timeout) — keep polling.
+    } catch (error) {
+      // Keep polling — a rate limit or timeout here is genuinely transient.
+      // But REMEMBER the error: swallowing it entirely turned "this endpoint
+      // cannot serve eth_call" into a 40s allowance timeout, which points the
+      // reader at their approval instead of at their RPC.
+      lastError = error;
     }
     await sleep(2000);
   }
+  const detail =
+    lastError instanceof Error ? ` Last RPC error: ${lastError.message}` : '';
   throw new Error(
-    'USDC allowance not readable after ~40s. The approval already landed but no USDC ' +
-      'moved — re-run the script to continue.',
+    `USDC allowance not readable after ~40s via ${BASE_RPC}. The approval already ` +
+      `landed but no USDC moved — re-run the script to continue, or set BASE_RPC_URL ` +
+      `to an endpoint that serves eth_call.${detail}`,
   );
 }
 
