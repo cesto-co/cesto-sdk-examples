@@ -16,6 +16,7 @@
     "byow:close": "node --env-file=.env --import tsx src/byow/06-close-position.ts",
     "byow:split-flow": "node --env-file=.env --import tsx src/byow/07-split-flow.ts",
     "byow:errors": "node --env-file=.env --import tsx src/byow/08-error-handling.ts",
+    "byow:rebalance": "node --env-file=.env --import tsx src/byow/16-rebalance-position.ts",
     "byow:bridge:base-to-solana": "node --env-file=.env --import tsx src/byow/09-bridge-base-to-solana.ts",
     "byow:bridge:solana-to-base": "node --env-file=.env --import tsx src/byow/10-bridge-solana-to-base.ts",
     "managed:user": "node --env-file=.env --import tsx src/managed/11-managed-user.ts",
